@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { User } from './entities/user.entity';
 import { RegisterDto, LoginDto, RefreshTokenDto } from './dto/auth.dto';
+import { Console } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -80,7 +81,7 @@ export class AuthService {
 
     // Generate tokens
     const tokens = await this.generateTokens(user);
-
+//console.log("Token: ", tokens);
     // Save refresh token
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
@@ -100,26 +101,33 @@ export class AuthService {
 
     try {
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
       });
 
       const user = await this.userRepository.findOne({
         where: { id: payload.sub },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          password: true,
+          refreshToken: true, 
+        },
       });
-
+//console.log(user);
       if (!user || !user.refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
-
+//console.log("user1: ",user);
       const refreshTokenMatches = await bcrypt.compare(
         refreshToken,
         user.refreshToken,
       );
-
+//console.log("user2: ",user);
       if (!refreshTokenMatches) {
         throw new UnauthorizedException('Invalid refresh token');
       }
-
+//console.log("user3: ",user);
       const tokens = await this.generateTokens(user);
       await this.updateRefreshToken(user.id, tokens.refreshToken);
 
@@ -146,7 +154,7 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+        secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
         expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN'),
       }),
       this.jwtService.signAsync(payload, {

@@ -22,12 +22,12 @@ export class RegisterDto {
 }
 
 export class LoginDto {
-  @ApiProperty({ example: 'john@example.com' })
+  @ApiProperty({ example: 'jafor@gmail.com' })
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({ example: 'password123' })
+  @ApiProperty({ example: '12345678' })
   @IsString()
   @IsNotEmpty()
   password: string;
