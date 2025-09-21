@@ -24,6 +24,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
+import { Public } from '../auth/decorators/public.decorator';
 import { multerConfig } from '../common/config/multer.config';
 import { CreateProductDto, UpdateProductDto, ProductQueryDto } from './dto/product.dto';
 
@@ -73,10 +74,11 @@ export class ProductsController {
   }
 
   @Get('search')
+  @Public()
   @ApiOperation({ summary: 'Search products by name or description' })
   @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
   @ApiQuery({ name: 'Search', required: true, example: 'iPhone' })
-  async search(@Query('q') searchQuery: string) {
+  async search(@Query('Search') searchQuery: string) {
     return this.productsService.search(searchQuery);
   }
 

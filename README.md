@@ -79,4 +79,26 @@ Interactive API documentation is available via Swagger:
 ```bash
 git clone https://github.com/your-username/e-commerce-inventory-api.git
 cd e-commerce-inventory-api
+npm install
+npm run start:dev
+```
+
+### 2. Environment variable
+
+```bash
+#Database
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USERNAME=[your username]
+DATABASE_PASSWORD=[your pass]
+DATABASE_NAME=[your DB name]
+
+# JWT
+JWT_ACCESS_SECRET=your-super-secret-jwt-access-key
+JWT_REFRESH_SECRET=your-super-secret-jwt-refresh-key
+JWT_ACCESS_EXPIRES_IN=1h
+JWT_REFRESH_EXPIRES_IN=7d
+
+# App
+PORT=3333
 ```
