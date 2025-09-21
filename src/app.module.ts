@@ -2,14 +2,11 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './auth/entities/user.entity';
-import { ProductsModule } from './products/products.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { ProductsModule } from './products/products.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Product } from './products/entities/product.entity.ts';
-import { Category } from './categories/entities/category.entity';
-import { StaticFilesModule } from './common/static-files.module';
 import { CategoriesModule } from './categories/categories.module';
+import { StaticFilesModule } from './common/static-files.module';
 
 @Module({
   imports: [
@@ -17,21 +14,30 @@ import { CategoriesModule } from './categories/categories.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST'),
-        port: configService.get<number>('DATABASE_PORT'),
-        username: configService.get<string>('DATABASE_USERNAME'),
-        password: configService.get<string>('DATABASE_PASSWORD'),
-        database: configService.get<string>('DATABASE_NAME'),
-        entities: [User, Category, Product],
-        synchronize: true, // Only for development
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-      }),
       inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const synchronize = config.get<string>('DB_SYNCHRONIZE') === 'true';
+
+        return {
+          type: 'postgres',
+          url: config.get<string>('DATABASE_URL'), 
+          autoLoadEntities: true,
+          synchronize,
+
+          ssl: { rejectUnauthorized: false },
+          extra: {
+            ssl: { rejectUnauthorized: false },
+            max: 5,
+          },
+
+          keepConnectionAlive: true,
+        } as any;
+      },
     }),
+
     StaticFilesModule,
     AuthModule,
     CategoriesModule,
@@ -45,3 +51,5 @@ import { CategoriesModule } from './categories/categories.module';
   ],
 })
 export class AppModule {}
+
+
