@@ -75,7 +75,7 @@ export class ProductsController {
   @Get('search')
   @ApiOperation({ summary: 'Search products by name or description' })
   @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
-  @ApiQuery({ name: 'q', required: true, example: 'iPhone' })
+  @ApiQuery({ name: 'Search', required: true, example: 'iPhone' })
   async search(@Query('q') searchQuery: string) {
     return this.productsService.search(searchQuery);
   }

@@ -6,7 +6,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -15,10 +14,10 @@ async function bootstrap() {
     }),
   );
 
-  // Enable CORS
+
   app.enableCors();
 
-  // Swagger documentation
+
   const config = new DocumentBuilder()
     .setTitle('E-commerce Inventory API')
     .setDescription('API for managing e-commerce inventory system')

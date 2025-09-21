@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Repository, Like } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity.ts';
 import { Category } from '../categories/entities/category.entity';
@@ -24,7 +24,6 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto, file?: Express.Multer.File) {
     const { categoryId } = createProductDto;
 
-    // Check if category exists
     const category = await this.categoryRepository.findOne({
       where: { id: categoryId },
     });
@@ -61,7 +60,7 @@ export class ProductsService {
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category');
 
-    // Apply filters
+
     if (categoryId) {
       queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId });
     }
@@ -84,7 +83,7 @@ export class ProductsService {
       );
     }
 
-    // Apply pagination
+
     queryBuilder
       .orderBy('product.createdAt', 'DESC')
       .skip((page - 1) * limit)
@@ -123,7 +122,6 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    // Check if category exists (if categoryId is being updated)
     if (updateProductDto.categoryId) {
       const category = await this.categoryRepository.findOne({
         where: { id: updateProductDto.categoryId },
@@ -136,9 +134,7 @@ export class ProductsService {
 
     const updateData: Partial<Product> = { ...updateProductDto };
 
-    // Handle image update
     if (file) {
-      // Delete old image if exists
       if (product.imageUrl) {
         const oldImagePath = path.join(process.cwd(), product.imageUrl);
         if (fs.existsSync(oldImagePath)) {
@@ -167,7 +163,6 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    // Delete associated image
     if (product.imageUrl) {
       const imagePath = path.join(process.cwd(), product.imageUrl);
       if (fs.existsSync(imagePath)) {
@@ -185,8 +180,8 @@ export class ProductsService {
   async search(searchQuery: string) {
     const products = await this.productRepository.find({
       where: [
-        { name: Like(`%${searchQuery}%`) },
-        { description: Like(`%${searchQuery}%`) },
+        { name: ILike(`%${searchQuery}%`) },
+        { description: ILike(`%${searchQuery}%`) },
       ],
       relations: ['category'],
       order: { createdAt: 'DESC' },
